@@ -1,0 +1,89 @@
+1. The p_lnk variable is a pointer to the ready/sem. wait list. 
+
+The ret_val variable lets you know to unblock a task because you now have a return 
+
+value. 
+
+The tsk_stack variable contains the current stack assigned to this task. 
+
+The stack variable is a pointer that contains the address of the beginning of the Task 
+
+Stack memory block. 
+
+The two variables above are used in conjunction with the stack size to determine stack 
+
+usage. 
+
+The variable with type of struct OS_XCB will not lose the p_lnk field if you cast to a 
+
+OS_TCB. 
+
+2. The mp_tcb is the memory pool for the task control block. The mp_stk is the memory 
+
+pool for the stack. 
+
+3. The registers that are saved on the stack are as follows: 
+
+the PSR and the PC. Moreover, the following is also written on the stack in 
+
+rt_init_stack(): (U32)p_TCB->msg as well as a MAGIC_WORD. Also R1-R12 are saved 
+
+on the stack. In the rt_init_stack, the registers are cleared.
+
+To determine the start address of the stack you have to do rt_get_PSP and use the size 
+
+variable to add on to the get_PSP to get the end address. 
+
+-To determine the stack pointer of a task that is not in the RUNNING state, we can get 
+
+the information from the OS_TCB def. 
+
+-To determine the stack pointer for a task that is RUNNING, we can get the information 
+
+from rt_get_PSP()
+
+4. _declare_box(mympool,12,20);
+
+_init_box (mympool, sizeof (mympool), 20);
+
+The corresponding kernel function of _alloc_box() is 
+
+rt_alloc_box(). The corresponding kernel function of _free_box() 
+
+is rt_free_box(). 
+
+5. The rt_put_prio() function takes in two parameters: the P_XCB 
+
+list, the Task to put into the list. The task is inserted into 
+
+the list based on priority. If there is another task with the 
+
+same priority, this task will be removed from the list LATER 
+
+than the existing task in the list. This is expected behaviour 
+
+of the queue. The rt_get_first() function will take in a P_XCB 
+
+list and remove the top of the list. 
+
+6. rt_block() will block the task and choose the next ready task 
+
+with highest priority to run. The rt_dispatch() will dispatch 
+
+the next identified task or the next highest priority task. 
+
+7. The rt_mbx_wait function is used when you are waiting to send 
+
+a message. So the message has not been sent yet. Where as in the 
+
+rt_mbx_send, the task is receiving a message, so its ret_val can 
+
+be OS_R_MBX. But in the rt_mbx_wait, the task that has been 
+
+dispatched has not received the message yet, so we cannot return 
+
+OS_R_MBX
+
+8. OS_XCB is the data structure that is used by the two global 
+
+queues os_rdy and os_dly.

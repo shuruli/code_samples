@@ -1,0 +1,17 @@
+ALP/  
+    Sample code of fork from Advanced Linux Programming book.
+
+gettimeofday/ 
+    Sample code of using gettimeofday
+
+mqueue/
+    Sender.c has the sender and all the code that was in the main function as outlined
+    in the pseudocode. The sender function creates a child process that is the receiver.c
+    To execute the code, you need to execute ‘make’ in this folder. Next, ‘./producer <N>      <B>’. Additionally, the run_lab4.sh is in THIS folder. PLEASE EXECUTE THE CORRECT ONE. The receiver.c is also in this folder and contains the code necessary for the consumer. 
+
+tools/
+    A shell script to run each given (N,B) 500 times and compute the following items: 
+    - average system initialization time, 
+    - standard deviation of the system initialization time samples,
+    - data transmission time, and 
+    - standard deviation of the data transmission time samples.

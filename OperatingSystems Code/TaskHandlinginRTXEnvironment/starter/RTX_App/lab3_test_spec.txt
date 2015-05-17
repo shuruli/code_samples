@@ -1,0 +1,134 @@
+/*
+CREATING ALL TASKS AND INITIALIZING IT WITH TID'S
+*/
+
+Calling os_sys_init()...
+init: TID = 1
+init: created task10 with TID 2  //TASK10 IS TASK THAT WILL PRINT TASK_INFO, SO IT WILL BE HIGHEST PRIORITY TO PREEMPT OTHER TASKS
+init: created task1 with TID 3	//TASK1 WILL ALLOCATE MEMORY AND FILL THE MEMORY POOL
+init: created task2 with TID 4 	//TASK2 WILL TRY TO ALLOCATE MORE MEMORY, BUT WILL GET BLOCKED
+init: created task3 with TID 5	//TASK3 WILL TRY TO ALLOCATE MORE MEMORY AND GET BLOCKED. TASK3 HAS THE SAME PRIORITY AS TASK2. 	
+init: created task4 with TID 6	//TASK4 WILL TRY TO ALLOCATE MORE MEMORY AND GET BLOCKED. TASK4 HAS A LOWER PRIORITY THAN TASK2 AND TASK3.
+init: created task5 with TID 7	//TASK5	WILL FREE SOME MEMORY AND SHOULD UNBLOCK TASK2
+init: created task6 with TID 8	//TASK6 WILL FREE MORE MEMORY AND SHOULD UNBLOCK TASK3
+init: created task7 with TID 9	//TASK7 WILL FREE MORE MEMORY AND SHOULD UNBLOCK TASK4. TASK7, IN THE END, ALSO INCREASES STACK USAGE
+
+/*TASK10 WILL START FIRST BECAUSE IT IS HIGHEST PRIORITY. OTHER TASKS ARE READY. EACH TASK HAS AROUND 12% STACK USAGE*/
+TID     NAME            PRIO    STATE           %STACK
+1       init            1       READY           12%
+2       task10          10      RUNNING         10%
+3       task1           9       READY           12%
+4       task2           8       READY           12% //NOTE TASK2 HAS SAME PRIORITY AS TASK3, AND TASK4 HAS LESS PRIORITY
+5       task3           8       READY           12%
+6       task4           7       READY           12%
+7       task5           6       READY           12%
+8       task6           5       READY           12%
+9       task7           3       READY           12%
+
+/*TASK1 WILL ALLOCATE MEMORY AND FILL UP THE SHARED MEMORY POOL. BUT IT WILL NOT BE BLOCKED*/
+task1 allocating memory
+/*NOW TASK2 WILL TRY TO ALLOCATE MORE MEMORY BUT THE MEMORY POOL IS ALREADY FULL, SO IT WILL BE BLOCKED*/
+task2 allocating memory
+
+/*TASK2 WILL BE WAITING FOR MEMORY AND TASK1 WILL BE DELAYED, SINCE IT IS COMPLETED*/
+TID      NAME            PRIO    STATE           %STACK
+1       init            1       READY           12%
+2       task10          10      RUNNING         10%
+3       task1           9       WAIT_DLY        12%	//TASK1 IS WAIT_DLY BECAUSE WE DELAYED BEFORE WE DELETE THE TASK
+4       task2           8       WAIT_MEM        12%	//TASK2 IS WAITING FOR MEMORY
+5       task3           8       READY           42%
+6       task4           7       READY           12%
+7       task5           6       READY           12%
+8       task6           5       READY           12%
+9       task7           3       READY           12%
+
+/*NOW TASK3 WILL TRY TO ALLOCATE MEMORY, BUT THE MEMORY POOL IS ALREADY FULL. 
+NOTICE THAT TASK3 ALLOCATES MEMORY AFTER TASK2. SO TASK2 SHOULD BE UNBLOCKED BEFORE TASK3, EVEN THOUGH THEY HAVE THE SAME PRIORITY*/
+task3 allocating memory
+
+/*NOW TASK4 WILL TRY TO ALLOCATE MEMORY, BUT THE MEMORY POOL IS ALREADY FULL.
+NOTICE THAT TASK4 ALLOCATES MEMORY AFTER TASK2 AND TASK3, AND IT HAS THE LOWEST PRIORITY. SO IT SHOULD BE UNBLOCKED LAST*/
+task4 allocating memory
+
+/*SINCE TASK2-TASK4 ARE BLOCKED, WAITING FOR MEMORY, TASK5 WILL RUN. TASK5 FREES MEMORY*/
+freeing memory task 5
+
+/*SINCE TASK2 HAS HIGHEST PRIORITY AND IT WAS BLOCKED FIRST, TASK2 WILL BE UNBLOCKED FIRST*/
+task2 is unblocked
+
+TID NAME            PRIO    STATE           %STACK
+1       init            1       READY           12%
+2       task10          10      RUNNING         10%
+3       task1           9       WAIT_DLY        12%
+4       task2           8       WAIT_DLY        12% //NOTE HOW TASK2 IS NOT WAITING FOR MEMORY ANYMORE, BECAUSE IT IS UNBLOCKED
+5       task3           8       WAIT_MEM        12%	//TASK3 AND TASK4 IS STILL WAITING FOR MEMORY BECAUSE IT HASN'T BEEN FREED YET
+6       task4           7       WAIT_MEM        12%
+7       task5           6       WAIT_DLY        12%
+8       task6           5       READY           42%
+9       task7           3       READY           12%
+
+/*TASK6 IS NOW RUN, SINCE ITS READY AND THE HIGHEST PRIORITY. TASK6 WILL FREE MORE MEMORY*/
+freeing memory - task6
+
+/*TASK3 IS NOW UNBLOCKED BECAUSE IT IS THE HIGHEST PRIORITY OF THE UNBLOCKED TASKS*/
+task3 is unblocked
+
+/*TASK7 IS NOW RUN, SINCE ITS READY AND THE HIGHEST PRIORITY. TASK7 WILL FREE THE LAST BLOCK OF MEMORY*/
+freeing memory - task7
+
+/*TASK4 IS NOW UNBLOCKED*/
+task4 is unblocked
+
+/*NOW ALL OF OUR TASKS ARE UNBLOCKED ARE WAIT_DLY BECAUSE WE WANTED TO SHOW THE RESULT*/
+TID     NAME            PRIO    STATE           %STACK
+2       task10          10      RUNNING         10%
+3       task1           9       WAIT_DLY        12%
+4       task2           8       WAIT_DLY        12%
+5       task3           8       WAIT_DLY        12%
+6       task4           7       WAIT_DLY        12%
+7       task5           6       WAIT_DLY        12%
+8       task6           5       WAIT_DLY        12%
+9       task7           3       WAIT_DLY        12%
+
+/*NOW WE START DELETING THE TASKS*/
+Deleting task1
+/*NOW TASK1 IS NOT PRINTED OUT ANYMORE*/
+TID     NAME            PRIO    STATE           %STACK
+2       task10          10      RUNNING         10%
+4       task2           8       READY           12%
+5       task3           8       WAIT_DLY        12%
+6       task4           7       WAIT_DLY        12%
+7       task5           6       READY           12%
+8       task6           5       WAIT_DLY        12%
+9       task7           3       WAIT_DLY        12%
+
+/*TASK2 GOT DELETED*/
+deleting task2
+deletingTID     NAME            PRIO    STATE           %STACK
+2       task10          10      RUNNING         10%
+5       task3           8       WAIT_DLY        12%
+6       task4           7       WAIT_DLY        12%
+7       task5           6       READY           42%
+8       task6           5       READY           12%
+9       task7           3       READY           12%
+deleting task3
+deleting task4
+ task5
+deletinTID      NAME            PRIO    STATE           %STACK
+2       task10          10      RUNNING         10%
+8       task6           5       READY           42%
+9       task7           3       READY           12%
+g task6TID      NAME            PRIO    STATE           %STACK
+2       task10          10      RUNNING         10%
+8       task6           5       READY           42%
+9       task7           3       READY           12%
+
+
+/*NOW ALL OF OUR TASKS ARE DELETED EXCEPT TASK10 AND TASK7*/
+
+/*NOW TASK7 WILL INCREASE ITS STACK USAGE BY 50% BY CREATING A LIST THAT IS STACK_SIZE/2 (512/2 = 256)*/
+/*TASK7 PREVIOUSLY HAD A STACK USAGE OF 12%*/
+Increasing stack usage by 50
+TID     NAME            PRIO    STATE           %STACK
+2       task10          10      RUNNING         10%
+9       task7           3       READY           62% //NOW THE TASK USAGE IS 62% WHICH IS AN INCREASE OF 50%
